@@ -9,16 +9,19 @@ env = Environment(
 )
 tpl = env.get_template("out.j2.html")
 
-# TODO: load multiple files lol
-data = []
 with open(sys.argv[1]) as f:
-    data += json.load(f)
+    data = json.load(f)
+    # NOTE: the PowerShell script doesn't do multiple rooms at once,
+    # so it only outputs an object for now. The ideal data looks like
+    # data/test.json which is an array of objects :)
+    if isinstance(data, dict):
+        data = [data]
 
 now = int(datetime.now().timestamp())
 then = now
 for group in data:
     for v in group["values"].values():
-        v = min(then, v)
+        then = min(then, v)
 
 chart_range = now - then
 
