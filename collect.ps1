@@ -3,6 +3,8 @@
     [string[]]$Servers,
     [Parameter(Mandatory)]
     [string]$Filter
+    [Parameter(Mandatory)]
+    [string]$OutputName
 )
 
 $DomainControllers = @()
@@ -36,4 +38,7 @@ foreach ($obj in $DomainControllers) {
     }
 }
 
-ConvertTo-JSON -InputObject $results
+ConvertTo-JSON -InputObject @{
+    name = $OutputName
+    values = $results
+}
