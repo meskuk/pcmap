@@ -3,48 +3,29 @@
 	<head>
 		<meta charset=utf-8>
 		<meta name=viewport content="width=device-width">
-		<style>
-
-			body {
-				display: flex;
-				flex-flow: row wrap;
-				max-width: 100vw;
-				font-family: sans-serif;
-			}
-			.group { margin: 10px; }
-			.chart {
-				display: grid;
-				/* TODO: make it so that the gap can be the same for row and column.
-				.cell divs aren't exactly 100px due to border and padding, so that
-				needs to be accounted for. */
-				grid-template-columns: repeat(6, 100px);
-				column-gap: 10px;
-				row-gap: 3px;
-			}
-			.cell {
-				max-width: 100px;
-				min-width: 100px;
-				min-height: 100px;
-				max-height: 100px;
-				padding: 2px;
-				transition-duration: 0.2s;
-				border: 2px solid transparent;
-			}
-			.cell:hover {
-				scale: 105%;
-				border-color: black;
-			}
-			.low { color: #ddd; }
-		</style>
+		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
+		<h1>Activity chart!</h1>
+		<p>Chart of when classroom computers were most recently active, based on when they authenticated to Active Directory (so <code>lastlogon</code>).</p>
+		<p>Accuracy <i>very much</i> not guaranteed.</p>
+		<div class="key">
+			<div class="key-0">Oldest</div>
+			<div class="key-25"></div>
+			<div class="key-50"></div>
+			<div class="key-75"></div>
+			<div class="key-100">Newest</div>
+		</div>
+		{% if lastpage %}
+		<a href="{{ lastpage }}"><- Previous page</a>
+		{% endif %}
 		{% for group in groups %}
 		<div class="group">
 			<h2>{{ group["name"]}} </h2>
 			<div class="chart">
 				{% for name, val, time in group["cells"] %}
 				<div
-					class="cell {{ "low" if val < 30 else "" }}"
+					class="cell{{ " low" if val < 30 else "" }}"
 					style="background: hsl(100 100% {{ val }}%)"
 				>
 					<b>{{ name }}</b>

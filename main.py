@@ -9,35 +9,34 @@ env = Environment(
 )
 tpl = env.get_template("out.j2.html")
 
-with open(sys.argv[1]) as f:
-    data = json.load(f)
-    # NOTE: the PowerShell script doesn't do multiple rooms at once,
-    # so it only outputs an object for now. The ideal data looks like
-    # data/test.json which is an array of objects :)
-    if isinstance(data, dict):
-        data = [data]
+data = []
+for filename in sys.argv[1:]:
+    with open(filename) as f:
+        group = json.load(f)
+        data.append(group)
 
-now = int(datetime.now().timestamp())
-then = now
+now = oldest = int(datetime.now().timestamp())
 for group in data:
-    for v in group["values"].values():
-        then = min(then, v)
+    for ts in group["values"].values():
+        oldest = min(oldest, ts)
 
-chart_range = now - then
+chart_range = now - oldest
 
 groups = []
 for group in data:
     cells = []
     vals = group["values"]
-    for v in vals:
-        ts = datetime.fromtimestamp(vals[v]).strftime("%d-%m-%Y\n%H:%M:%S")
+    for name in vals:
+        ts = datetime.fromtimestamp(vals[name]).strftime("%d-%m-%Y %H:%M:%S")
         # 'min-max normalisation' ; https://www.geeksforgeeks.org/data-analysis/normalization-and-scaling/
-        sat = ((vals[v] - then) / chart_range) * 100
-        cells.append((v, sat, ts))
+        percent = ((vals[name] - oldest) / chart_range) * 100
+        # TODO: make this configurable
+        transformed_name = name[-6:]
+        cells.append((transformed_name, percent, ts))
     groups.append({
         "name": group["name"],
         "cells": cells
     })
 
-with open("out.html", "w") as f:
+with open("out/index.html", "w") as f:
     f.write(tpl.render(groups=groups))

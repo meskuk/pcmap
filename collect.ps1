@@ -2,9 +2,8 @@
     [Parameter(Mandatory)]
     [string[]]$Servers,
     [Parameter(Mandatory)]
-    [string]$Filter
-    [Parameter(Mandatory)]
-    [string]$OutputName
+    [string]$Filter,
+    [string]$OutputName = "$Filter"
 )
 
 $DomainControllers = @()
