@@ -1,33 +1,31 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset=utf-8>
-		<meta name=viewport content="width=device-width">
-		<link rel="stylesheet" href="style.css" />
-	</head>
-	<body>
-		<h1>Activity chart!</h1>
-		<p>Chart of when classroom computers were most recently active, based on when they authenticated to Active Directory (so <code>lastlogon</code>).</p>
-		<p>Accuracy <i>very much</i> not guaranteed.</p>
-		<div class="key">
-			<div class="key-0">Oldest</div>
-			<div class="key-25"></div>
-			<div class="key-50"></div>
-			<div class="key-75"></div>
-			<div class="key-100">Newest</div>
-		</div>
-		{% if lastpage %}
-		<a href="{{ lastpage }}"><- Previous page</a>
-		{% endif %}
+
+<head>
+	<meta charset=utf-8>
+	<meta name=viewport content="width=device-width">
+	<link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+	<h1>Activity chart!</h1>
+	<p>Chart of when classroom computers were most recently active, based on when they authenticated to Active Directory
+		(so <code>lastlogon</code>).</p>
+	<p>Accuracy <i>very much</i> not guaranteed.</p>
+	<div class="key">
+		<div class="key-0">Oldest</div>
+		<div class="key-25"></div>
+		<div class="key-50"></div>
+		<div class="key-75"></div>
+		<div class="key-100">Newest</div>
+	</div>
+	<div class="group-ctr">
 		{% for group in groups %}
 		<div class="group">
 			<h2>{{ group["name"]}} </h2>
 			<div class="chart">
 				{% for name, val, time in group["cells"] %}
-				<div
-					class="cell{{ " low" if val < 30 else "" }}"
-					style="background: hsl(100 100% {{ val }}%)"
-				>
+				<div class="cell{{ " low" if val < 30 else "" }}" style="background: hsl(100 100% {{ val }}%)">
 					<b>{{ name }}</b>
 					<br>
 					{{ time }}
@@ -36,5 +34,7 @@
 			</div>
 		</div>
 		{% endfor %}
-	</body>
+	</div>
+</body>
+
 </html>

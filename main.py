@@ -3,6 +3,9 @@ from datetime import datetime
 import json
 import sys
 
+# NOTE: Specifically for sorting my uni's classroom hostnames!
+name_key = lambda n: int(n.split("-")[-1])
+
 env = Environment(
     loader = FileSystemLoader("templates"),
     autoescape = select_autoescape()
@@ -25,11 +28,12 @@ chart_range = now - oldest
 groups = []
 for group in data:
     cells = []
-    vals = group["values"]
-    for name in vals:
-        ts = datetime.fromtimestamp(vals[name]).strftime("%d-%m-%Y %H:%M:%S")
+    times = group["values"]
+    sorted_names = sorted(group["values"], key=name_key)
+    for name in sorted_names:
+        ts = datetime.fromtimestamp(times[name]).strftime("%d-%m-%Y %H:%M:%S")
         # 'min-max normalisation' ; https://www.geeksforgeeks.org/data-analysis/normalization-and-scaling/
-        percent = ((vals[name] - oldest) / chart_range) * 100
+        percent = ((times[name] - oldest) / chart_range) * 100
         # TODO: make this configurable
         transformed_name = name[-6:]
         cells.append((transformed_name, percent, ts))
