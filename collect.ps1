@@ -2,8 +2,7 @@
     [Parameter(Mandatory)]
     [string[]]$Servers,
     [Parameter(Mandatory)]
-    [string]$Filter,
-    [string]$OutputName = "$Filter"
+    [string[]]$Rooms,
 )
 
 $DomainControllers = @()
@@ -16,28 +15,38 @@ $searcher = New-Object System.DirectoryServices.DirectorySearcher
 $searcher.Filter = $Filter
 $searcher.SearchRoot = $DomainControllers[0]
 
-$results = @{}
+$now = ([DateTimeOffset][datetime]::Now).ToUnixTimeSeconds()
 
-foreach ($obj in $DomainControllers) {
-    $searcher.SearchRoot = $obj
-    
-    foreach ($res in $searcher.FindAll()) {
-        $name = $res.Properties.name[0]
-        $lastlogon = $res.Properties.lastlogon[0]
-        # stackoverflow.com/a/34271940
-        $lastlogondt = [datetime]::FromFileTime($lastlogon)
-        $lastlogondt = ([DateTimeOffset]$lastlogondt).ToUnixTimeSeconds()
-        if ($results.Contains($name)) {
-            if ($lastlogondt -gt $results[$name]) {
-                $results[$name] = $lastlogondt
-            }
-        } else {
-            $results[$name] = $lastlogondt
-        }
-    }
+$resultset = @()
+foreach ($room in $rooms) {
+	$times = @{}
+	foreach ($obj in $DomainControllers) {
+	    $searcher.SearchRoot = $obj
+	    # TODO: Maybe a system that lets me specify a format string as a parameter
+	    $searcher.Filter = "(&(objectClass=computer)(name=*-LAB-$room))"
+	    
+	    foreach ($res in $searcher.FindAll()) {
+	        $name = $res.Properties.name[0]
+	        $lastlogon = $res.Properties.lastlogon[0]
+	        # stackoverflow.com/a/34271940
+	        $lastlogondt = [datetime]::FromFileTime($lastlogon)
+	        $lastlogondt = ([DateTimeOffset]$lastlogondt).ToUnixTimeSeconds()
+	        if ($times.Contains($name)) {
+	            if ($lastlogondt -gt $times[$name]) {
+	                $times[$name] = $lastlogondt
+	            }
+	        } else {
+	            $times[$name] = $lastlogondt
+	        }
+	    }
+	}
+	$resultset += @{
+		name = "Room $room"
+		times = $times
+	}
 }
 
-ConvertTo-JSON -InputObject @{
-    name = $OutputName
-    values = $results
+ConvertTo-JSON -Depth 3 -InputObject @{
+    rooms = $results
+    collected_at = $now
 }

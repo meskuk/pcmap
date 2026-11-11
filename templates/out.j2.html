@@ -12,6 +12,17 @@
 	<p>Chart of when classroom computers were most recently active, based on when they authenticated to Active Directory
 		(so <code>lastlogon</code>).</p>
 	<p>Accuracy <i>very much</i> not guaranteed.</p>
+	<nav> 
+		<ol>
+			{% if prev_page %}
+			<li><a href="{{ prev_page }}"><- Previous</a></li>
+			{% endif %}
+			<li><a href="list.html">All</a></li>
+			{% if next_page %}
+			<li><a href="{{ next_page }}">Next --></a></li>
+			{% endif %}
+		</ol>
+	</nav>
 	<div class="key">
 		<div class="key-0">Oldest</div>
 		<div class="key-25"></div>
